@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lysterfield Sailing Club - Club Boat Booking</title>
+    <style>
+        /* CSS Styles */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        h1, h2 {
+            color: #003366;
+            text-align: center;
+        }
+        #booking-date-header {
+            text-align: center;
+            color: #004080;
+            margin-top: -10px;
+            margin-bottom: 30px;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #003366;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+        button:hover {
+            background-color: #004080;
+        }
+        button:disabled {
+            background-color: #aaaaaa;
+            cursor: not-allowed;
+        }
+        .btn-danger { background-color: #dc3545; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-edit { background-color: #28a745; }
+        .btn-edit:hover { background-color: #218838; }
+        .boat-class-section {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 25px;
+            background-color: #f9f9f9;
+        }
+        .boat-class-header {
+            border-bottom: 2px solid #003366;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        .boat-class-header h2 {
+             margin-bottom: 5px;
+        }
+        .availability-status {
+            padding: 8px 12px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            width: 200px;
+            margin: 0 auto 15px auto;
+        }
+        .available { background-color: #28a745; }
+        .unavailable { background-color: #dc3545; }
+        .booking-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .booking-area input[type="text"] { width: 250px; }
+        .booking-area button { margin: 0; }
+        .booked-list-container {
+            border-top: 1px solid #ccc;
+            padding-top: 15px;
+        }
+        .booked-list-container h3 {
+            margin-top: 0;
+            color: #003366;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        .booked-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            border-radius: 4px;
+            background-color: #fff;
+            margin-bottom: 5px;
+            border: 1px solid #eee;
+        }
+        .booked-item .user-name { font-weight: bold; }
+        .booked-item button {
+            padding: 4px 8px;
+            font-size: 12px;
+            margin: 0;
+        }
+        .no-bookings {
+            color: #666;
+            font-style: italic;
+            text-align: center;
+        }
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.5em;
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div id="loading-overlay" class="hidden">Loading...</div>
+    <div class="container">
+        <h1>Club Boat Booking</h1>
+        <h2 id="booking-date-header"></h2>
+
+        <!-- Boat sections -->
+        <div class="boat-class-section" data-boat-class="pacer">
+            <div class="boat-class-header"><h2>Pacers</h2></div>
+            <div class="availability-status"></div>
+            <div class="booking-area">
+                <input type="text" placeholder="Enter your name to book"><button class="btn-edit">Book a Pacer</button>
+            </div>
+            <div class="booked-list-container">
+                <h3>Current Bookings</h3><div class="booked-list"></div>
+            </div>
+        </div>
+        <div class="boat-class-section" data-boat-class="sabre">
+            <div class="boat-class-header"><h2>Sabres</h2></div>
+            <div class="availability-status"></div>
+            <div class="booking-area">
+                <input type="text" placeholder="Enter your name to book"><button class="btn-edit">Book a Sabre</button>
+            </div>
+            <div class="booked-list-container">
+                <h3>Current Bookings</h3><div class="booked-list"></div>
+            </div>
+        </div>
+        <div class="boat-class-section" data-boat-class="optimist">
+            <div class="boat-class-header"><h2>Optimists</h2></div>
+            <div class="availability-status"></div>
+            <div class="booking-area">
+                <input type="text" placeholder="Enter your name to book"><button class="btn-edit">Book an Optimist</button>
+            </div>
+            <div class="booked-list-container">
+                <h3>Current Bookings</h3><div class="booked-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxxeg7Edoq79mf5lRwwqvoEy-0jskYaCsd4xann6l5FaPpd8LUyPktx2H3oBH6OZd1HRA/exec';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            let bookings = {}; 
+
+            async function saveDataToGoogleSheet() {
+                loadingOverlay.textContent = 'Saving...';
+                loadingOverlay.classList.remove('hidden');
+                try {
+                    await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        mode: 'cors',
+                        cache: 'no-cache',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify(bookings),
+                        redirect: 'follow'
+                    });
+                } catch (error) {
+                    console.error("Error saving data:", error);
+                    alert("Could not save booking. Please check your internet connection.");
+                } finally {
+                    loadingOverlay.classList.add('hidden');
+                }
+            }
+
+            async function loadDataFromGoogleSheet() {
+                loadingOverlay.textContent = 'Loading...';
+                loadingOverlay.classList.remove('hidden');
+                try {
+                    const response = await fetch(WEB_APP_URL, { method: 'GET', mode: 'cors', cache: 'no-cache', redirect: 'follow' });
+                    if (!response.ok) {
+                        throw new Error(`Network response was not ok, status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    if(data.status && data.status === 'error') {
+                        throw new Error(data.message);
+                    }
+                    bookings = data;
+                } catch (error) {
+                    console.error("Error loading data:", error);
+                    alert("Could not load existing bookings. Starting with a fresh session.");
+                    bookings = {
+                        pacer: { total: 6, bookedBy: [] },
+                        sabre: { total: 4, bookedBy: [] },
+                        optimist: { total: 2, bookedBy: [] }
+                    };
+                } finally {
+                    loadingOverlay.classList.add('hidden');
+                }
+            }
+            
+            function getUpcomingSaturday() {
+                const now = new Date();
+                const today = now.getDay();
+                const hours = now.getHours();
+                const daysUntilSaturday = (6 - today + 7) % 7;
+                const upcomingSaturday = new Date(now);
+                upcomingSaturday.setDate(now.getDate() + daysUntilSaturday);
+                if (today === 6 && hours >= 18) {
+                    upcomingSaturday.setDate(upcomingSaturday.getDate() + 7);
+                }
+                return upcomingSaturday;
+            }
+            function formatDate(date) {
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                return date.toLocaleDateString('en-AU', options);
+            }
+            const bookingDateHeader = document.getElementById('booking-date-header');
+            const targetSaturday = getUpcomingSaturday();
+            bookingDateHeader.textContent = `Book a boat for this Saturday, ${formatDate(targetSaturday)}`;
+
+            function render(boatClass) {
+                const section = document.querySelector(`.boat-class-section[data-boat-class="${boatClass}"]`);
+                if (!section || !bookings[boatClass]) return;
+                const data = bookings[boatClass];
+                const bookedCount = data.bookedBy.length;
+                const availableCount = data.total - bookedCount;
+                const statusEl = section.querySelector('.availability-status');
+                statusEl.textContent = `${availableCount} of ${data.total} available`;
+                if (availableCount > 0) { statusEl.className = 'availability-status available'; }
+                else { statusEl.className = 'availability-status unavailable'; statusEl.textContent = 'Unavailable'; }
+                const bookButton = section.querySelector('.booking-area button');
+                const nameInput = section.querySelector('.booking-area input');
+                bookButton.disabled = availableCount === 0;
+                nameInput.disabled = availableCount === 0;
+                const listEl = section.querySelector('.booked-list');
+                listEl.innerHTML = '';
+                if (bookedCount === 0) {
+                    listEl.innerHTML = '<p class="no-bookings">No bookings yet.</p>';
+                } else {
+                    data.bookedBy.forEach((name, index) => {
+                        const item = document.createElement('div');
+                        item.classList.add('booked-item');
+                        item.innerHTML = `<span class="user-name">${name}</span><button class="btn-danger" data-index="${index}">Cancel</button>`;
+                        listEl.appendChild(item);
+                    });
+                }
+            }
+
+            document.querySelector('.container').addEventListener('click', async (e) => {
+                const section = e.target.closest('.boat-class-section');
+                if (!section) return;
+                const boatClass = section.dataset.boatClass;
+
+                if (e.target.matches('.booking-area button')) {
+                    const input = section.querySelector('.booking-area input');
+                    const name = input.value.trim();
+                    if (!name) { alert('Please enter your name.'); return; }
+                    bookings[boatClass].bookedBy.push(name);
+                    input.value = '';
+                    render(boatClass);
+                    await saveDataToGoogleSheet();
+                }
+
+                if (e.target.matches('.booked-item button')) {
+                    const indexToRemove = parseInt(e.target.dataset.index, 10);
+                    const nameToRemove = bookings[boatClass].bookedBy[indexToRemove];
+                    if (confirm(`Cancel booking for ${nameToRemove}?`)) {
+                        bookings[boatClass].bookedBy.splice(indexToRemove, 1);
+                        render(boatClass);
+                        await saveDataToGoogleSheet();
+                    }
+                }
+            });
+
+            await loadDataFromGoogleSheet();
+            render('pacer');
+            render('sabre');
+            render('optimist');
+        });
+    </script>
+</body>
+</html>

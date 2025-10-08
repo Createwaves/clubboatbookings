@@ -23,6 +23,13 @@
             margin-top: -10px;
             margin-bottom: 30px;
         }
+        .sub-heading-note {
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+            margin-top: -25px;
+            margin-bottom: 25px;
+        }
         .container {
             background-color: white;
             padding: 20px;
@@ -141,10 +148,11 @@
     </style>
 </head>
 <body>
-    <div id="loading-overlay" class="hidden">Loading...</div>
+    <div id="loading-overlay" class="hidden">Loading bookings, please wait a moment...</div>
     <div class="container">
         <h1>Club Boat Booking</h1>
         <h2 id="booking-date-header"></h2>
+        <p class="sub-heading-note">Boats can be booked up to a week in advance, bookings will reset at 6pm every Saturday</p>
 
         <!-- Boat sections -->
         <div class="boat-class-section" data-boat-class="pacer">
@@ -188,7 +196,7 @@
             let bookings = {}; 
 
             async function saveDataToGoogleSheet() {
-                loadingOverlay.textContent = 'Saving...';
+                loadingOverlay.textContent = 'Saving, please wait a moment...';
                 loadingOverlay.classList.remove('hidden');
                 try {
                     await fetch(WEB_APP_URL, {
@@ -208,7 +216,7 @@
             }
 
             async function loadDataFromGoogleSheet() {
-                loadingOverlay.textContent = 'Loading...';
+                loadingOverlay.textContent = 'Loading bookings, please wait a moment...';
                 loadingOverlay.classList.remove('hidden');
                 try {
                     const response = await fetch(WEB_APP_URL, { method: 'GET', mode: 'cors', cache: 'no-cache', redirect: 'follow' });

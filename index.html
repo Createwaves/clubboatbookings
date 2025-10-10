@@ -30,27 +30,47 @@
             margin-top: -25px;
             margin-bottom: 25px;
         }
-        .container {
+        .container, .access-container {
             background-color: white;
-            padding: 20px;
+            padding: 30px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+        .access-container {
+            max-width: 400px;
+            margin: 50px auto;
+            text-align: center;
+        }
+        .access-container h1 {
+            margin-bottom: 25px;
+        }
+        .access-container input[type="text"] {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        #error-message {
+            color: #dc3545;
+            margin-top: -10px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
         input[type="text"] {
-            padding: 8px;
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             box-sizing: border-box;
+            font-size: 1em;
         }
         button {
             background-color: #003366;
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 10px 20px;
             border-radius: 4px;
             cursor: pointer;
             margin-right: 10px;
             margin-bottom: 5px;
+            font-size: 1em;
         }
         button:hover {
             background-color: #004080;
@@ -98,7 +118,7 @@
             justify-content: center;
         }
         .booking-area input[type="text"] { width: 250px; }
-        .booking-area button { margin: 0; }
+        .booking-area button { margin: 0; font-size: 1em; }
         .booked-list-container {
             border-top: 1px solid #ccc;
             padding-top: 15px;
@@ -149,7 +169,15 @@
 </head>
 <body>
     <div id="loading-overlay" class="hidden">Loading bookings, please wait a moment...</div>
-    <div class="container">
+
+    <div id="access-container" class="access-container">
+        <h1>Enter Password</h1>
+        <input type="text" id="access-word-input" placeholder="Enter word">
+        <p id="error-message" class="hidden">Incorrect word. Please try again.</p>
+        <button id="confirm-access-btn">Confirm</button>
+    </div>
+
+    <div class="container hidden">
         <h1>Club Boat Booking</h1>
         <h2 id="booking-date-header"></h2>
         <p class="sub-heading-note">Boats can be booked up to a week in advance, bookings will reset at 6pm every Saturday</p>
@@ -190,8 +218,36 @@
     <script>
         // --- CONFIGURATION ---
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxxeg7Edoq79mf5lRwwqvoEy-0jskYaCsd4xann6l5FaPpd8LUyPktx2H3oBH6OZd1HRA/exec';
+        const ACCESS_WORD = 'bob';
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
+            const accessContainer = document.getElementById('access-container');
+            const bookingContainer = document.querySelector('.container');
+            const confirmBtn = document.getElementById('confirm-access-btn');
+            const accessInput = document.getElementById('access-word-input');
+            const errorMessage = document.getElementById('error-message');
+
+            const attemptAccess = () => {
+                const userInput = accessInput.value.trim().toLowerCase();
+                if (userInput === ACCESS_WORD) {
+                    accessContainer.classList.add('hidden');
+                    bookingContainer.classList.remove('hidden');
+                    initialiseApp();
+                } else {
+                    errorMessage.classList.remove('hidden');
+                    accessInput.value = '';
+                }
+            };
+
+            confirmBtn.addEventListener('click', attemptAccess);
+            accessInput.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    attemptAccess();
+                }
+            });
+        });
+
+        async function initialiseApp() {
             const loadingOverlay = document.getElementById('loading-overlay');
             let bookings = {}; 
 
@@ -319,7 +375,7 @@
             render('pacer');
             render('sabre');
             render('optimist');
-        });
+        }
     </script>
 </body>
 </html>

@@ -186,7 +186,7 @@ All bookings reset at 5 PM each Saturday.</p>
 
         <!-- Boat sections -->
         <div class="boat-class-section" data-boat-class="pacer">
-            <div class="boat-class-header"><h2>Pacer</h2></div>
+            <div class="boat-class-header"><h2>Pacers</h2></div>
             <div class="availability-status"></div>
             <div class="booking-area">
                 <input type="text" placeholder="Enter your name to book"><button class="btn-edit">Book a Pacer</button>
@@ -196,7 +196,7 @@ All bookings reset at 5 PM each Saturday.</p>
             </div>
         </div>
         <div class="boat-class-section" data-boat-class="sabre">
-            <div class="boat-class-header"><h2>Sabre</h2></div>
+            <div class="boat-class-header"><h2>Sabres</h2></div>
             <div class="availability-status"></div>
             <div class="booking-area">
                 <input type="text" placeholder="Enter your name to book"><button class="btn-edit">Book a Sabre</button>
@@ -206,7 +206,7 @@ All bookings reset at 5 PM each Saturday.</p>
             </div>
         </div>
         <div class="boat-class-section" data-boat-class="optimist">
-            <div class="boat-class-header"><h2>Optimist</h2></div>
+            <div class="boat-class-header"><h2>Optimists</h2></div>
             <div class="availability-status"></div>
             <div class="booking-area">
                 <input type="text" placeholder="Enter your name to book"><button class="btn-edit">Book an Optimist</button>
@@ -286,6 +286,10 @@ All bookings reset at 5 PM each Saturday.</p>
                         throw new Error(data.message);
                     }
                     bookings = data;
+                    // Force pacer total to 5, overriding the value from the Google Sheet
+                    if (bookings.pacer) {
+                        bookings.pacer.total = 5;
+                    }
                 } catch (error) {
                     console.error("Error loading data:", error);
                     alert("Could not load existing bookings. Starting with a fresh session.");

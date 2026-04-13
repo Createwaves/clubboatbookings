@@ -289,12 +289,16 @@ If you are unable to sail, please return to this page and cancel your booking. A
                     if (bookings.pacer) {
                         bookings.pacer.total = 5;
                     }
+                    // Force sabre total to 3, overriding the value from the Google Sheet
+                    if (bookings.sabre) {
+                        bookings.sabre.total = 3;
+                    }
                 } catch (error) {
                     console.error("Error loading data:", error);
                     alert("Could not load existing bookings. Starting with a fresh session.");
                     bookings = {
                         pacer: { total: 5, bookedBy: [] },
-                        sabre: { total: 4, bookedBy: [] },
+                        sabre: { total: 3, bookedBy: [] },
                         optimist: { total: 2, bookedBy: [] }
                     };
                 } finally {
